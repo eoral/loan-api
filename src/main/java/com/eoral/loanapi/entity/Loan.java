@@ -25,6 +25,9 @@ public class Loan {
     private Integer numberOfInstallments;
 
     @Column
+    private BigDecimal interestRate;
+
+    @Column
     private LocalDate createDate;
 
     @Column
@@ -60,6 +63,14 @@ public class Loan {
 
     public void setNumberOfInstallments(Integer numberOfInstallments) {
         this.numberOfInstallments = numberOfInstallments;
+    }
+
+    public BigDecimal getInterestRate() {
+        return interestRate;
+    }
+
+    public void setInterestRate(BigDecimal interestRate) {
+        this.interestRate = interestRate;
     }
 
     public LocalDate getCreateDate() {

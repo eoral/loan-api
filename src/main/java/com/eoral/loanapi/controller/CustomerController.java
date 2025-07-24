@@ -1,10 +1,9 @@
 package com.eoral.loanapi.controller;
 
+import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
 import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.service.CustomerService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,5 +20,14 @@ public class CustomerController {
     @GetMapping("")
     public List<Customer> getAllCustomers() {
         return customerService.getAllCustomers();
+    }
+
+    @GetMapping("{id}/loans")
+    public String getLoansOfCustomer(
+            @PathVariable Long customerId,
+            @RequestParam(required = false) Integer numberOfInstallments,
+            @RequestParam(required = false) Boolean isPaid) {
+        new GetLoansOfCustomerRequest(customerId, numberOfInstallments, isPaid);
+        return null;
     }
 }

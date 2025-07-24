@@ -2,21 +2,24 @@ package com.eoral.loanapi.service.impl;
 
 import com.eoral.loanapi.dto.CreateLoanRequest;
 import com.eoral.loanapi.dto.CreateLoanResponse;
-import com.eoral.loanapi.exception.BadRequestException;
-import com.eoral.loanapi.exception.NotFoundException;
+import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
+import com.eoral.loanapi.dto.LoanResponse;
 import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.entity.LoanInstallment;
+import com.eoral.loanapi.exception.BadRequestException;
+import com.eoral.loanapi.exception.NotFoundException;
 import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.repository.LoanRepository;
 import com.eoral.loanapi.service.LoanService;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,6 +86,7 @@ public class DefaultLoanService implements LoanService {
         loan.setCustomer(customer);
         loan.setLoanAmount(createLoanRequest.amount());
         loan.setNumberOfInstallments(createLoanRequest.numberOfInstallments());
+        loan.setInterestRate(createLoanRequest.interestRate());
         loan.setCreateDate(getCurrentDate());
         loan.setPaid(false);
 
@@ -131,5 +135,31 @@ public class DefaultLoanService implements LoanService {
 
     private LocalDate calculateLoanInstallmentDueDate(LocalDate loanDate, int installmentNo) {
         return loanDate.plusMonths(installmentNo).withDayOfMonth(1);
+    }
+
+    public List<LoanResponse> getLoansOfCustomer(GetLoansOfCustomerRequest getLoansOfCustomerRequest) {
+
+        if (getLoansOfCustomerRequest.customerId() == null) {
+            throw new BadRequestException("Customer is not specified.");
+        }
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(getLoansOfCustomerRequest.customerId());
+        Customer customer = optionalCustomer.orElseThrow(() -> new NotFoundException("Customer is not found."));
+
+        Loan loanExample = new Loan();
+        loanExample.setCustomer(customer);
+        if (getLoansOfCustomerRequest.numberOfInstallments() != null) {
+            loanExample.setNumberOfInstallments(getLoansOfCustomerRequest.numberOfInstallments());
+        }
+        if (getLoansOfCustomerRequest.isPaid() != null) {
+            loanExample.setPaid(getLoansOfCustomerRequest.isPaid());
+        }
+
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<Loan> example = Example.of(loanExample, exampleMatcher);
+
+        loanRepository.findAll(example); // todo: sort
+
+        return null;
     }
 }
