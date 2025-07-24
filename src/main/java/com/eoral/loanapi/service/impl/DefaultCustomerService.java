@@ -1,6 +1,6 @@
 package com.eoral.loanapi.service.impl;
 
-import com.eoral.loanapi.model.Customer;
+import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.service.CustomerService;
 import org.springframework.stereotype.Service;

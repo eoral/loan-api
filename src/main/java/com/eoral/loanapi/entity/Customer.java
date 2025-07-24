@@ -1,4 +1,4 @@
-package com.eoral.loanapi.model;
+package com.eoral.loanapi.entity;
 
 import jakarta.persistence.*;
 

@@ -1,6 +1,6 @@
 package com.eoral.loanapi.service;
 
-import com.eoral.loanapi.model.Customer;
+import com.eoral.loanapi.entity.Customer;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.eoral.loanapi.controller;
 
-import com.eoral.loanapi.model.LoanInstallment;
+import com.eoral.loanapi.entity.LoanInstallment;
 import com.eoral.loanapi.service.LoanInstallmentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

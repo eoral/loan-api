@@ -1,9 +1,9 @@
-package com.eoral.loanapi.model;
+package com.eoral.loanapi.entity;
 
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "loan")
@@ -22,10 +22,10 @@ public class Loan {
     private BigDecimal loanAmount;
 
     @Column
-    private Integer numberOfInstallment;
+    private Integer numberOfInstallments;
 
     @Column
-    private Instant createDate;
+    private LocalDate createDate;
 
     @Column
     private Boolean isPaid;
@@ -54,19 +54,19 @@ public class Loan {
         this.loanAmount = loanAmount;
     }
 
-    public Integer getNumberOfInstallment() {
-        return numberOfInstallment;
+    public Integer getNumberOfInstallments() {
+        return numberOfInstallments;
     }
 
-    public void setNumberOfInstallment(Integer numberOfInstallment) {
-        this.numberOfInstallment = numberOfInstallment;
+    public void setNumberOfInstallments(Integer numberOfInstallments) {
+        this.numberOfInstallments = numberOfInstallments;
     }
 
-    public Instant getCreateDate() {
+    public LocalDate getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Instant createDate) {
+    public void setCreateDate(LocalDate createDate) {
         this.createDate = createDate;
     }
 

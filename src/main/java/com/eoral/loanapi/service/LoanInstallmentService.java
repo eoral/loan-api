@@ -1,6 +1,6 @@
 package com.eoral.loanapi.service;
 
-import com.eoral.loanapi.model.LoanInstallment;
+import com.eoral.loanapi.entity.LoanInstallment;
 
 import java.util.List;
 

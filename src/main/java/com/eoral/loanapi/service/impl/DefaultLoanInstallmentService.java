@@ -1,6 +1,6 @@
 package com.eoral.loanapi.service.impl;
 
-import com.eoral.loanapi.model.LoanInstallment;
+import com.eoral.loanapi.entity.LoanInstallment;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.service.LoanInstallmentService;
 import org.springframework.stereotype.Service;
