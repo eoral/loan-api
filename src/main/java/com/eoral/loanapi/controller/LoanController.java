@@ -1,7 +1,7 @@
 package com.eoral.loanapi.controller;
 
 import com.eoral.loanapi.dto.CreateLoanRequest;
-import com.eoral.loanapi.dto.CreateLoanResponse;
+import com.eoral.loanapi.dto.LoanResponse;
 import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +28,12 @@ public class LoanController {
     }
 
     @PostMapping("")
-    public CreateLoanResponse createLoan(CreateLoanRequest createLoanRequest) {
+    public LoanResponse createLoan(CreateLoanRequest createLoanRequest) {
         return loanService.createLoan(createLoanRequest);
     }
 
     @GetMapping("test")
-    public CreateLoanResponse test() {
+    public LoanResponse test() {
         // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
         CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
         return loanService.createLoan(createLoanRequest);

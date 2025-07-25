@@ -1,7 +1,6 @@
 package com.eoral.loanapi.service.impl;
 
 import com.eoral.loanapi.dto.CreateLoanRequest;
-import com.eoral.loanapi.dto.CreateLoanResponse;
 import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
 import com.eoral.loanapi.dto.LoanResponse;
 import com.eoral.loanapi.entity.Customer;
@@ -12,6 +11,7 @@ import com.eoral.loanapi.exception.NotFoundException;
 import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.repository.LoanRepository;
+import com.eoral.loanapi.service.EntityDtoConversionService;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -35,11 +35,13 @@ public class DefaultLoanService implements LoanService {
     private final LoanRepository loanRepository;
     private final CustomerRepository customerRepository;
     private final LoanInstallmentRepository loanInstallmentRepository;
+    private final EntityDtoConversionService entityDtoConversionService;
 
-    public DefaultLoanService(LoanRepository loanRepository, CustomerRepository customerRepository, LoanInstallmentRepository loanInstallmentRepository) {
+    public DefaultLoanService(LoanRepository loanRepository, CustomerRepository customerRepository, LoanInstallmentRepository loanInstallmentRepository, EntityDtoConversionService entityDtoConversionService) {
         this.loanRepository = loanRepository;
         this.customerRepository = customerRepository;
         this.loanInstallmentRepository = loanInstallmentRepository;
+        this.entityDtoConversionService = entityDtoConversionService;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class DefaultLoanService implements LoanService {
 
     @Override
     @Transactional
-    public CreateLoanResponse createLoan(CreateLoanRequest createLoanRequest) {
+    public LoanResponse createLoan(CreateLoanRequest createLoanRequest) {
 
         // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
 
@@ -93,7 +95,7 @@ public class DefaultLoanService implements LoanService {
         Loan persistedLoan = loanRepository.save(loan);
         createLoanInstallments(persistedLoan, createLoanRequest);
 
-        return new CreateLoanResponse(persistedLoan.getId());
+        return entityDtoConversionService.convertToLoanResponse(persistedLoan);
     }
 
 
@@ -137,6 +139,7 @@ public class DefaultLoanService implements LoanService {
         return loanDate.plusMonths(installmentNo).withDayOfMonth(1);
     }
 
+    @Override
     public List<LoanResponse> getLoansOfCustomer(GetLoansOfCustomerRequest getLoansOfCustomerRequest) {
 
         if (getLoansOfCustomerRequest.customerId() == null) {
@@ -158,8 +161,9 @@ public class DefaultLoanService implements LoanService {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
         Example<Loan> example = Example.of(loanExample, exampleMatcher);
 
-        loanRepository.findAll(example); // todo: sort
-
-        return null;
+        // todo: sort
+        return loanRepository.findAll(example).stream()
+                .map(e -> entityDtoConversionService.convertToLoanResponse(e))
+                .collect(Collectors.toList());
     }
 }
