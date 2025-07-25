@@ -2,6 +2,7 @@ package com.eoral.loanapi.service.impl;
 
 import com.eoral.loanapi.dto.CreateLoanRequest;
 import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
+import com.eoral.loanapi.dto.LoanInstallmentResponse;
 import com.eoral.loanapi.dto.LoanResponse;
 import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.entity.Loan;
@@ -164,6 +165,17 @@ public class DefaultLoanService implements LoanService {
         // todo: sort
         return loanRepository.findAll(example).stream()
                 .map(e -> entityDtoConversionService.convertToLoanResponse(e))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LoanInstallmentResponse> getInstallmentsOfLoan(Long loanId) {
+        Optional<Loan> optionalLoan = loanRepository.findById(loanId);
+        if (optionalLoan.isEmpty()) {
+            throw new NotFoundException("Loan is not found.");
+        }
+        return loanInstallmentRepository.findByLoanIdOrderByDueDate(loanId).stream()
+                .map(e -> entityDtoConversionService.convertToLoanInstallmentResponse(e))
                 .collect(Collectors.toList());
     }
 }

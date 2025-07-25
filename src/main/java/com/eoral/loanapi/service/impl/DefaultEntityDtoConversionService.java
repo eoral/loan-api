@@ -1,7 +1,9 @@
 package com.eoral.loanapi.service.impl;
 
+import com.eoral.loanapi.dto.LoanInstallmentResponse;
 import com.eoral.loanapi.dto.LoanResponse;
 import com.eoral.loanapi.entity.Loan;
+import com.eoral.loanapi.entity.LoanInstallment;
 import com.eoral.loanapi.service.EntityDtoConversionService;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +19,16 @@ public class DefaultEntityDtoConversionService implements EntityDtoConversionSer
                 loan.getInterestRate(),
                 loan.getCreateDate(),
                 loan.getPaid());
+    }
+
+    @Override
+    public LoanInstallmentResponse convertToLoanInstallmentResponse(LoanInstallment loanInstallment) {
+        return new LoanInstallmentResponse(
+                loanInstallment.getId(),
+                loanInstallment.getAmount(),
+                loanInstallment.getPaidAmount(),
+                loanInstallment.getDueDate(),
+                loanInstallment.getPaymentDate(),
+                loanInstallment.getPaid());
     }
 }
