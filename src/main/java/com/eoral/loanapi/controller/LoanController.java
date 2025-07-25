@@ -1,9 +1,6 @@
 package com.eoral.loanapi.controller;
 
-import com.eoral.loanapi.dto.CreateLoanRequest;
-import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
-import com.eoral.loanapi.dto.LoanInstallmentResponse;
-import com.eoral.loanapi.dto.LoanResponse;
+import com.eoral.loanapi.dto.*;
 import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +24,7 @@ public class LoanController {
     }
 
     @PostMapping("")
-    public LoanResponse createLoan(CreateLoanRequest createLoanRequest) {
+    public LoanResponse createLoan(@RequestBody CreateLoanRequest createLoanRequest) {
         return loanService.createLoan(createLoanRequest);
     }
 
@@ -40,6 +37,11 @@ public class LoanController {
 
     @GetMapping("{loanId}/installments")
     public List<LoanInstallmentResponse> getInstallmentsOfLoan(@PathVariable Long loanId) {
+        return loanService.getInstallmentsOfLoan(loanId);
+    }
+
+    @PostMapping("{loanId}/payment") // todo: consider using put
+    public List<LoanInstallmentResponse> payLoan(@PathVariable Long loanId, @RequestBody PayLoanRequest payLoanRequest) {
         return loanService.getInstallmentsOfLoan(loanId);
     }
 }

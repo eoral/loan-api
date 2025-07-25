@@ -1,9 +1,6 @@
 package com.eoral.loanapi.service.impl;
 
-import com.eoral.loanapi.dto.CreateLoanRequest;
-import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
-import com.eoral.loanapi.dto.LoanInstallmentResponse;
-import com.eoral.loanapi.dto.LoanResponse;
+import com.eoral.loanapi.dto.*;
 import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.entity.LoanInstallment;
@@ -68,6 +65,10 @@ public class DefaultLoanService implements LoanService {
             throw new BadRequestException("Amount is not specified.");
         }
 
+        if (createLoanRequest.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Amount should be greater than 0.");
+        }
+
         if (createLoanRequest.amount().compareTo(availableCreditLimit) > 0) {
             throw new BadRequestException("Amount exceeds available amount.");
         }
@@ -84,17 +85,21 @@ public class DefaultLoanService implements LoanService {
             throw new BadRequestException("Interest rate is not in allowed range.");
         }
 
+        LocalDate currentDate = getCurrentDate();
+
         //  id, customerId, loanAmount, numberOfInstallment, createDate, isPaid
         Loan loan = new Loan();
         loan.setCustomer(customer);
         loan.setLoanAmount(createLoanRequest.amount());
         loan.setNumberOfInstallments(createLoanRequest.numberOfInstallments());
         loan.setInterestRate(createLoanRequest.interestRate());
-        loan.setCreateDate(getCurrentDate());
+        loan.setCreateDate(currentDate);
         loan.setPaid(false);
 
         Loan persistedLoan = loanRepository.save(loan);
         createLoanInstallments(persistedLoan, createLoanRequest);
+
+        // todo: update customer
 
         return entityDtoConversionService.convertToLoanResponse(persistedLoan);
     }
@@ -105,8 +110,7 @@ public class DefaultLoanService implements LoanService {
     }
 
     private LocalDate getCurrentDate() {
-        // I am using LocalDate.now() for simplicity. If we have customers in different time zones or countries,
-        // it is better to consider time zones.
+        // I am using LocalDate.now() for simplicity. Normally, we should consider customer time zone.
         return LocalDate.now();
     }
 
@@ -177,5 +181,61 @@ public class DefaultLoanService implements LoanService {
         return loanInstallmentRepository.findByLoanIdOrderByDueDate(loanId).stream()
                 .map(e -> entityDtoConversionService.convertToLoanInstallmentResponse(e))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void payLoan(Long loanId, PayLoanRequest payLoanRequest) {
+
+        Optional<Loan> optionalLoan = loanRepository.findById(loanId);
+        Loan loan = optionalLoan.orElseThrow(() -> new NotFoundException("Loan is not found."));
+
+        if (loan.getPaid()) {
+            throw new BadRequestException("Loan is already paid.");
+        }
+
+        if (payLoanRequest.amount() == null) {
+            throw new BadRequestException("Amount is not specified.");
+        }
+
+        if (payLoanRequest.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Amount should be greater than 0.");
+        }
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(loan.getCustomer().getId());
+        Customer customer = optionalCustomer.get();
+        LocalDate currentDate = getCurrentDate();
+        LocalDate maxDueDate = findMaxDueDateForPayableInstallments(currentDate);
+        List<LoanInstallment> loanInstallments = loanInstallmentRepository.findByLoanIdAndIsPaidFalseAndDueDateLessThanEqualOrderByDueDate(loanId, maxDueDate);
+        BigDecimal availableAmount = payLoanRequest.amount().add(BigDecimal.ZERO);
+        List<LoanInstallment> payableLoanInstallments = new ArrayList<>();
+
+        for (LoanInstallment loanInstallment : loanInstallments) {
+            int compareToResult = loanInstallment.getAmount().compareTo(availableAmount);
+            if (compareToResult <= 0) {
+                payableLoanInstallments.add(loanInstallment);
+                availableAmount = availableAmount.subtract(loanInstallment.getAmount());
+            }
+            if (compareToResult >= 0) {
+                break;
+            }
+        }
+
+        for (LoanInstallment loanInstallment : payableLoanInstallments) {
+            loanInstallment.setPaidAmount(loanInstallment.getAmount());
+            loanInstallment.setPaymentDate(currentDate);
+            loanInstallment.setPaid(true);
+        }
+        loanInstallmentRepository.saveAll(payableLoanInstallments);
+
+        if (loanInstallmentRepository.countByLoanIdAndIsPaidFalse(loanId) == 0) {
+            loan.setPaid(true);
+            loanRepository.save(loan);
+        }
+
+        // todo: update customer
+    }
+
+    private LocalDate findMaxDueDateForPayableInstallments(LocalDate currentDate) {
+        return currentDate.withDayOfMonth(1).plusMonths(3).minusDays(1);
     }
 }
