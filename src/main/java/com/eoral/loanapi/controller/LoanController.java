@@ -28,8 +28,8 @@ public class LoanController {
         return loanService.createLoan(createLoanRequest);
     }
 
-    @GetMapping("test")
-    public LoanResponse test() {
+    @GetMapping("test1") // todo: remove
+    public LoanResponse test1() {
         // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
         CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
         return loanService.createLoan(createLoanRequest);
@@ -40,8 +40,14 @@ public class LoanController {
         return loanService.getInstallmentsOfLoan(loanId);
     }
 
-    @PostMapping("{loanId}/payment") // todo: consider using put
-    public List<LoanInstallmentResponse> payLoan(@PathVariable Long loanId, @RequestBody PayLoanRequest payLoanRequest) {
-        return loanService.getInstallmentsOfLoan(loanId);
+    @PostMapping("{loanId}/payment")
+    public PayLoanResponse payLoan(@PathVariable Long loanId, @RequestBody PayLoanRequest payLoanRequest) {
+        return loanService.payLoan(loanId, payLoanRequest);
+    }
+
+    @GetMapping("test2") // todo: remove
+    public PayLoanResponse test2(@RequestParam Long loanId, @RequestParam BigDecimal amount) {
+        PayLoanRequest payLoanRequest = new PayLoanRequest(amount);
+        return loanService.payLoan(loanId, payLoanRequest);
     }
 }

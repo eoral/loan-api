@@ -99,7 +99,9 @@ public class DefaultLoanService implements LoanService {
         Loan persistedLoan = loanRepository.save(loan);
         createLoanInstallments(persistedLoan, createLoanRequest);
 
-        // todo: update customer
+        BigDecimal newUsedCreditLimit = customer.getUsedCreditLimit().add(createLoanRequest.amount());
+        customer.setUsedCreditLimit(newUsedCreditLimit);
+        customerRepository.save(customer);
 
         return entityDtoConversionService.convertToLoanResponse(persistedLoan);
     }
@@ -116,7 +118,10 @@ public class DefaultLoanService implements LoanService {
 
     private List<LoanInstallment> createLoanInstallments(Loan loan, CreateLoanRequest createLoanRequest) {
 
-        // id, loanId, amount, paidAmount, dueDate, paymentDate, isPaid
+        // id, loanId, amountWithoutInterest, amount, paidAmount, dueDate, paymentDate, isPaid
+
+        BigDecimal loanInstallmentAmountWithoutInterest = calculateLoanInstallmentAmountWithoutInterest(
+                createLoanRequest.amount(), createLoanRequest.numberOfInstallments());
 
         BigDecimal loanInstallmentAmount = calculateLoanInstallmentAmount(
                 createLoanRequest.amount(), createLoanRequest.numberOfInstallments(), createLoanRequest.interestRate());
@@ -126,6 +131,7 @@ public class DefaultLoanService implements LoanService {
         for (int installmentNo = 1; installmentNo <= createLoanRequest.numberOfInstallments(); installmentNo++) {
             LoanInstallment loanInstallment = new LoanInstallment();
             loanInstallment.setLoan(loan);
+            loanInstallment.setAmountWithoutInterest(loanInstallmentAmountWithoutInterest);
             loanInstallment.setAmount(loanInstallmentAmount);
             loanInstallment.setDueDate(calculateLoanInstallmentDueDate(loan.getCreateDate(), installmentNo));
             loanInstallment.setPaid(false);
@@ -133,6 +139,10 @@ public class DefaultLoanService implements LoanService {
         }
 
         return loanInstallmentRepository.saveAll(loanInstallments);
+    }
+
+    private BigDecimal calculateLoanInstallmentAmountWithoutInterest(BigDecimal loanAmount, int numberOfInstallments) {
+        return loanAmount.divide(BigDecimal.valueOf(numberOfInstallments), 2, RoundingMode.CEILING);
     }
 
     private BigDecimal calculateLoanInstallmentAmount(BigDecimal loanAmount, int numberOfInstallments, BigDecimal interestRate) {
@@ -183,8 +193,9 @@ public class DefaultLoanService implements LoanService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional
-    public void payLoan(Long loanId, PayLoanRequest payLoanRequest) {
+    public PayLoanResponse payLoan(Long loanId, PayLoanRequest payLoanRequest) {
 
         Optional<Loan> optionalLoan = loanRepository.findById(loanId);
         Loan loan = optionalLoan.orElseThrow(() -> new NotFoundException("Loan is not found."));
@@ -220,19 +231,30 @@ public class DefaultLoanService implements LoanService {
             }
         }
 
+        BigDecimal totalPaidAmountWithoutInterest = BigDecimal.ZERO;
+        BigDecimal totalPaidAmount = BigDecimal.ZERO;
         for (LoanInstallment loanInstallment : payableLoanInstallments) {
             loanInstallment.setPaidAmount(loanInstallment.getAmount());
             loanInstallment.setPaymentDate(currentDate);
             loanInstallment.setPaid(true);
+            totalPaidAmountWithoutInterest = totalPaidAmountWithoutInterest.add(loanInstallment.getAmountWithoutInterest());
+            totalPaidAmount = totalPaidAmount.add(loanInstallment.getAmount());
         }
         loanInstallmentRepository.saveAll(payableLoanInstallments);
+        int numberOfInstallmentsPaid = payableLoanInstallments.size();
 
+        boolean isPaidCompletely = false;
         if (loanInstallmentRepository.countByLoanIdAndIsPaidFalse(loanId) == 0) {
             loan.setPaid(true);
             loanRepository.save(loan);
+            isPaidCompletely = true;
         }
 
-        // todo: update customer
+        BigDecimal newUsedCreditLimit = customer.getUsedCreditLimit().subtract(totalPaidAmountWithoutInterest);
+        customer.setUsedCreditLimit(newUsedCreditLimit);
+        customerRepository.save(customer);
+
+        return new PayLoanResponse(numberOfInstallmentsPaid, totalPaidAmount, isPaidCompletely);
     }
 
     private LocalDate findMaxDueDateForPayableInstallments(LocalDate currentDate) {

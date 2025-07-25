@@ -1,9 +1,6 @@
 package com.eoral.loanapi.service;
 
-import com.eoral.loanapi.dto.CreateLoanRequest;
-import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
-import com.eoral.loanapi.dto.LoanInstallmentResponse;
-import com.eoral.loanapi.dto.LoanResponse;
+import com.eoral.loanapi.dto.*;
 import com.eoral.loanapi.entity.Loan;
 
 import java.util.List;
@@ -17,5 +14,7 @@ public interface LoanService {
     List<LoanResponse> getLoansOfCustomer(GetLoansOfCustomerRequest getLoansOfCustomerRequest);
 
     List<LoanInstallmentResponse> getInstallmentsOfLoan(Long loanId);
+
+    PayLoanResponse payLoan(Long loanId, PayLoanRequest payLoanRequest);
 
 }

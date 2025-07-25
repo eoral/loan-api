@@ -19,6 +19,9 @@ public class LoanInstallment {
     private Loan loan;
 
     @Column
+    private BigDecimal amountWithoutInterest;
+
+    @Column
     private BigDecimal amount;
 
     @Column
@@ -47,6 +50,14 @@ public class LoanInstallment {
 
     public void setLoan(Loan loan) {
         this.loan = loan;
+    }
+
+    public BigDecimal getAmountWithoutInterest() {
+        return amountWithoutInterest;
+    }
+
+    public void setAmountWithoutInterest(BigDecimal amountWithoutInterest) {
+        this.amountWithoutInterest = amountWithoutInterest;
     }
 
     public BigDecimal getAmount() {
