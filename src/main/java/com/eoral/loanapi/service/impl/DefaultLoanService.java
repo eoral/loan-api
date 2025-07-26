@@ -184,13 +184,12 @@ public class DefaultLoanService implements LoanService {
         Loan loan = checkLoan(loanId);
         checkLoanIsNotPaid(loan);
         checkAmountForPayLoan(payLoanRequest.amount());
-        Customer customer = customerService.checkCustomer(loan.getCustomer().getId());
         List<LoanInstallment> payableLoanInstallments = findPayableLoanInstallments(loanId, payLoanRequest.amount());
         List<LoanInstallment> paidLoanInstallments = updateLoanInstallmentsAsPaid(payableLoanInstallments);
         SummaryOfPaidLoanInstallments summary = getSummaryOfPaidLoanInstallments(paidLoanInstallments);
         boolean isPaidCompletely = updateLoanAsPaidIfApplicable(loan);
         if (summary.numberOfInstallmentsPaid() > 0) {
-            customerService.decreaseUsedCreditLimit(customer, summary.totalPaidAmountWithoutInterest());
+            customerService.decreaseUsedCreditLimit(loan.getCustomer(), summary.totalPaidAmountWithoutInterest());
         }
         return new PayLoanResponse(summary.numberOfInstallmentsPaid(), summary.totalPaidAmount(), isPaidCompletely);
     }

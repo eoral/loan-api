@@ -14,4 +14,6 @@ public class Constants {
     public static final BigDecimal MAX_INTEREST_RATE = new BigDecimal("0.5");
     public static final String INTEREST_RATE_RANGE_STR = MIN_INTEREST_RATE.toString() + " - " + MAX_INTEREST_RATE;
 
+    public static final int EARLY_PAYMENT_MAX_MONTHS = 3;
+
 }

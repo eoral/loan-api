@@ -1,6 +1,7 @@
 package com.eoral.loanapi.service.impl;
 
 import com.eoral.loanapi.service.DateTimeService;
+import com.eoral.loanapi.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,6 @@ public class DefaultDateTimeService implements DateTimeService {
 
     @Override
     public LocalDate findMaxDueDateForPayableInstallments(LocalDate currentDate) {
-        return currentDate.withDayOfMonth(1).plusMonths(3).minusDays(1);
+        return currentDate.plusMonths(Constants.EARLY_PAYMENT_MAX_MONTHS).minusDays(1);
     }
 }
