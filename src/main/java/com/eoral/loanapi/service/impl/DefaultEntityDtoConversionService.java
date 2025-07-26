@@ -42,6 +42,6 @@ public class DefaultEntityDtoConversionService implements EntityDtoConversionSer
                 loanInstallment.getPaidAmount(),
                 loanInstallment.getDueDate(),
                 loanInstallment.getPaymentDate(),
-                loanInstallment.getPaid());
+                loanInstallment.getIsPaid());
     }
 }

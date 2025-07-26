@@ -143,7 +143,7 @@ public class DefaultLoanService implements LoanService {
             loanInstallment.setAmountWithoutInterest(amountWithoutInterest);
             loanInstallment.setAmount(amountWithInterest);
             loanInstallment.setDueDate(dateTimeService.calculateLoanInstallmentDueDate(loan.getStartDate(), installmentNo));
-            loanInstallment.setPaid(false);
+            loanInstallment.setIsPaid(false);
             loanInstallments.add(loanInstallment);
         }
         return loanInstallmentRepository.saveAll(loanInstallments);
@@ -230,7 +230,7 @@ public class DefaultLoanService implements LoanService {
         for (LoanInstallment loanInstallment : loanInstallments) {
             loanInstallment.setPaidAmount(loanInstallment.getAmount());
             loanInstallment.setPaymentDate(paymentDate);
-            loanInstallment.setPaid(true);
+            loanInstallment.setIsPaid(true);
         }
         return loanInstallmentRepository.saveAll(loanInstallments);
     }
