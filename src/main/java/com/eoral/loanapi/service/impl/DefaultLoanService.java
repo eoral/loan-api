@@ -67,7 +67,7 @@ public class DefaultLoanService implements LoanService {
             loanExample.setNumberOfInstallments(numberOfInstallments);
         }
         if (isPaid != null) {
-            loanExample.setPaid(isPaid);
+            loanExample.setIsPaid(isPaid);
         }
         ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
         Example<Loan> example = Example.of(loanExample, exampleMatcher);
@@ -127,7 +127,7 @@ public class DefaultLoanService implements LoanService {
         loan.setNumberOfInstallments(createLoanRequest.numberOfInstallments());
         loan.setInterestRate(createLoanRequest.interestRate());
         loan.setCreateDate(currentDate);
-        loan.setPaid(false);
+        loan.setIsPaid(false);
         return loanRepository.save(loan);
     }
 
@@ -191,7 +191,7 @@ public class DefaultLoanService implements LoanService {
     }
 
     private void checkLoanIsNotPaid(Loan loan) {
-        if (loan.getPaid()) {
+        if (loan.getIsPaid()) {
             throw new BadRequestException("Loan is already paid.");
         }
     }
@@ -247,7 +247,7 @@ public class DefaultLoanService implements LoanService {
 
     private boolean updateLoanAsPaidIfApplicable(Loan loan) {
         if (loanInstallmentRepository.countByLoanIdAndIsPaidFalse(loan.getId()) == 0) {
-            loan.setPaid(true);
+            loan.setIsPaid(true);
             loanRepository.save(loan);
             return true;
         } else {
