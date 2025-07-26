@@ -1,5 +1,5 @@
-insert into customer (id, name, surname, credit_limit, used_credit_limit)
-  values (1, 'Eray', 'Oral', 1000000, 0);
+insert into customer (id, name, surname, credit_limit, used_credit_limit, created_by, created_date, last_modified_by, last_modified_date)
+  values (1, 'Eray', 'Oral', 1000000, 0, 'admin', '2025-01-01T10:00:00+00:00', 'admin', '2025-01-01T10:00:00+00:00');
 select next value for customer_seq;
 
 --insert into loan (id, customer_id, loan_amount, number_of_installments, interest_rate, create_date, is_paid)

@@ -1,12 +1,16 @@
 package com.eoral.loanapi.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "customer")
-public class Customer { // todo: consider using a base entity and timestamps
+@Getter
+@Setter
+public class Customer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_seq_gen")
@@ -24,44 +28,4 @@ public class Customer { // todo: consider using a base entity and timestamps
 
     @Column
     private BigDecimal usedCreditLimit;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public BigDecimal getCreditLimit() {
-        return creditLimit;
-    }
-
-    public void setCreditLimit(BigDecimal creditLimit) {
-        this.creditLimit = creditLimit;
-    }
-
-    public BigDecimal getUsedCreditLimit() {
-        return usedCreditLimit;
-    }
-
-    public void setUsedCreditLimit(BigDecimal usedCreditLimit) {
-        this.usedCreditLimit = usedCreditLimit;
-    }
 }
