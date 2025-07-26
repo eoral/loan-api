@@ -1,8 +1,7 @@
 package com.eoral.loanapi.controller;
 
-import com.eoral.loanapi.dto.GetLoansOfCustomerRequest;
+import com.eoral.loanapi.dto.CustomerResponse;
 import com.eoral.loanapi.dto.LoanResponse;
-import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.service.CustomerService;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +15,21 @@ public class CustomerController {
     private final CustomerService customerService;
     private final LoanService loanService;
 
-    public CustomerController(CustomerService customerService, LoanService loanService) {
+    public CustomerController(
+            CustomerService customerService,
+            LoanService loanService) {
         this.customerService = customerService;
         this.loanService = loanService;
     }
 
     @GetMapping("")
-    public List<Customer> getAllCustomers() {
+    public List<CustomerResponse> getAllCustomers() {
         return customerService.getAllCustomers();
+    }
+
+    @GetMapping("{customerId}")
+    public CustomerResponse getCustomer(@PathVariable Long customerId) {
+        return customerService.getCustomer(customerId);
     }
 
     @GetMapping("{customerId}/loans")
@@ -31,6 +37,6 @@ public class CustomerController {
             @PathVariable Long customerId,
             @RequestParam(required = false) Integer numberOfInstallments,
             @RequestParam(required = false) Boolean isPaid) {
-        return loanService.getLoansOfCustomer(new GetLoansOfCustomerRequest(customerId, numberOfInstallments, isPaid));
+        return loanService.getLoansOfCustomer(customerId, numberOfInstallments, isPaid);
     }
 }

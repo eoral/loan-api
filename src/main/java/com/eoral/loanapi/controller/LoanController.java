@@ -1,7 +1,6 @@
 package com.eoral.loanapi.controller;
 
 import com.eoral.loanapi.dto.*;
-import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,20 +17,8 @@ public class LoanController {
         this.loanService = loanService;
     }
 
-    @GetMapping("")
-    public List<Loan> getAllLoans() {
-        return loanService.getAllLoans();
-    }
-
     @PostMapping("")
     public LoanResponse createLoan(@RequestBody CreateLoanRequest createLoanRequest) {
-        return loanService.createLoan(createLoanRequest);
-    }
-
-    @GetMapping("test1") // todo: remove
-    public LoanResponse test1() {
-        // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
-        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
         return loanService.createLoan(createLoanRequest);
     }
 
@@ -43,6 +30,13 @@ public class LoanController {
     @PostMapping("{loanId}/payment")
     public PayLoanResponse payLoan(@PathVariable Long loanId, @RequestBody PayLoanRequest payLoanRequest) {
         return loanService.payLoan(loanId, payLoanRequest);
+    }
+
+    @GetMapping("test1") // todo: remove
+    public LoanResponse test1() {
+        // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
+        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
+        return loanService.createLoan(createLoanRequest);
     }
 
     @GetMapping("test2") // todo: remove

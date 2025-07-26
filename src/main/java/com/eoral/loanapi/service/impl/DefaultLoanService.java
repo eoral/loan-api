@@ -6,7 +6,6 @@ import com.eoral.loanapi.entity.Loan;
 import com.eoral.loanapi.entity.LoanInstallment;
 import com.eoral.loanapi.exception.BadRequestException;
 import com.eoral.loanapi.exception.NotFoundException;
-import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.repository.LoanRepository;
 import com.eoral.loanapi.service.CustomerService;
@@ -23,31 +22,57 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class DefaultLoanService implements LoanService {
 
-    private final LoanRepository loanRepository;
-    private final CustomerRepository customerRepository;
-    private final LoanInstallmentRepository loanInstallmentRepository;
-    private final EntityDtoConversionService entityDtoConversionService;
-    private final DateTimeService dateTimeService;
     private final CustomerService customerService;
+    private final DateTimeService dateTimeService;
+    private final EntityDtoConversionService entityDtoConversionService;
+    private final LoanRepository loanRepository;
+    private final LoanInstallmentRepository loanInstallmentRepository;
 
-    public DefaultLoanService(LoanRepository loanRepository, CustomerRepository customerRepository, LoanInstallmentRepository loanInstallmentRepository, EntityDtoConversionService entityDtoConversionService, DateTimeService dateTimeService, CustomerService customerService) {
-        this.loanRepository = loanRepository;
-        this.customerRepository = customerRepository;
-        this.loanInstallmentRepository = loanInstallmentRepository;
-        this.entityDtoConversionService = entityDtoConversionService;
-        this.dateTimeService = dateTimeService;
+    public DefaultLoanService(
+            CustomerService customerService,
+            DateTimeService dateTimeService,
+            EntityDtoConversionService entityDtoConversionService,
+            LoanRepository loanRepository,
+            LoanInstallmentRepository loanInstallmentRepository) {
         this.customerService = customerService;
+        this.dateTimeService = dateTimeService;
+        this.entityDtoConversionService = entityDtoConversionService;
+        this.loanRepository = loanRepository;
+        this.loanInstallmentRepository = loanInstallmentRepository;
     }
 
     @Override
-    public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
+    public List<LoanResponse> getLoansOfCustomer(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
+        customerService.checkCustomer(customerId);
+        List<Loan> loans = getLoans(customerId, numberOfInstallments, isPaid);
+        return loans.stream()
+                .map(e -> entityDtoConversionService.convertToLoanResponse(e))
+                .collect(Collectors.toList());
+    }
+
+    private List<Loan> getLoans(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        Loan loanExample = new Loan();
+        loanExample.setCustomer(customer);
+        if (numberOfInstallments != null) {
+            loanExample.setNumberOfInstallments(numberOfInstallments);
+        }
+        if (isPaid != null) {
+            loanExample.setPaid(isPaid);
+        }
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
+        Example<Loan> example = Example.of(loanExample, exampleMatcher);
+        // It is better to use JPA Metamodel classes when referencing entity attributes.
+        return loanRepository.findAll(example, Sort.by(Sort.Direction.ASC, "createDate"));
     }
 
     @Override
@@ -58,8 +83,7 @@ public class DefaultLoanService implements LoanService {
         checkAmountForCreateLoan(createLoanRequest.amount(), availableCreditLimit);
         checkNumberOfInstallmentsForCreateLoan(createLoanRequest.numberOfInstallments());
         checkInterestRateForCreateLoan(createLoanRequest.interestRate());
-        LocalDate currentDate = dateTimeService.getCurrentDateForCurrentBankBranch();
-        Loan loan = createLoan(customer, currentDate, createLoanRequest);
+        Loan loan = createLoan(customer, createLoanRequest);
         createLoanInstallments(loan, createLoanRequest);
         customerService.increaseUsedCreditLimit(customer, createLoanRequest.amount());
         return entityDtoConversionService.convertToLoanResponse(loan);
@@ -95,7 +119,8 @@ public class DefaultLoanService implements LoanService {
         }
     }
 
-    private Loan createLoan(Customer customer, LocalDate currentDate, CreateLoanRequest createLoanRequest) {
+    private Loan createLoan(Customer customer, CreateLoanRequest createLoanRequest) {
+        LocalDate currentDate = dateTimeService.getCurrentDateForCurrentBankBranch();
         Loan loan = new Loan();
         loan.setCustomer(customer);
         loan.setLoanAmount(createLoanRequest.amount());
@@ -138,32 +163,11 @@ public class DefaultLoanService implements LoanService {
     }
 
     @Override
-    public List<LoanResponse> getLoansOfCustomer(GetLoansOfCustomerRequest getLoansOfCustomerRequest) {
-        customerService.checkCustomer(getLoansOfCustomerRequest.customerId());
-        List<Loan> loans = getLoans(
-                getLoansOfCustomerRequest.customerId(),
-                getLoansOfCustomerRequest.numberOfInstallments(),
-                getLoansOfCustomerRequest.isPaid());
-        return loans.stream()
-                .map(e -> entityDtoConversionService.convertToLoanResponse(e))
+    public List<LoanInstallmentResponse> getInstallmentsOfLoan(Long loanId) {
+        checkLoan(loanId);
+        return loanInstallmentRepository.findByLoanIdOrderByDueDate(loanId).stream()
+                .map(e -> entityDtoConversionService.convertToLoanInstallmentResponse(e))
                 .collect(Collectors.toList());
-    }
-
-    private List<Loan> getLoans(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
-        Customer customer = new Customer();
-        customer.setId(customerId);
-        Loan loanExample = new Loan();
-        loanExample.setCustomer(customer);
-        if (numberOfInstallments != null) {
-            loanExample.setNumberOfInstallments(numberOfInstallments);
-        }
-        if (isPaid != null) {
-            loanExample.setPaid(isPaid);
-        }
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
-        Example<Loan> example = Example.of(loanExample, exampleMatcher);
-        // It is better to use JPA Metamodel classes when referencing entity attributes.
-        return loanRepository.findAll(example, Sort.by(Sort.Direction.ASC, "createDate"));
     }
 
     private Loan checkLoan(Long loanId) {
@@ -175,14 +179,6 @@ public class DefaultLoanService implements LoanService {
     }
 
     @Override
-    public List<LoanInstallmentResponse> getInstallmentsOfLoan(Long loanId) {
-        checkLoan(loanId);
-        return loanInstallmentRepository.findByLoanIdOrderByDueDate(loanId).stream()
-                .map(e -> entityDtoConversionService.convertToLoanInstallmentResponse(e))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public PayLoanResponse payLoan(Long loanId, PayLoanRequest payLoanRequest) {
         Loan loan = checkLoan(loanId);
@@ -190,28 +186,13 @@ public class DefaultLoanService implements LoanService {
         checkAmountForPayLoan(payLoanRequest.amount());
         Customer customer = customerService.checkCustomer(loan.getCustomer().getId());
         List<LoanInstallment> payableLoanInstallments = findPayableLoanInstallments(loanId, payLoanRequest.amount());
-        LocalDate paymentDate = dateTimeService.getCurrentDateForCurrentBankBranch();
-        List<LoanInstallment> paidLoanInstallments = updateLoanInstallmentsAsPaid(payableLoanInstallments, paymentDate);
-        BigDecimal totalPaidAmountWithoutInterest = BigDecimal.ZERO;
-        BigDecimal totalPaidAmount = BigDecimal.ZERO;
-        for (LoanInstallment loanInstallment : paidLoanInstallments) {
-            totalPaidAmountWithoutInterest = totalPaidAmountWithoutInterest.add(loanInstallment.getAmountWithoutInterest());
-            totalPaidAmount = totalPaidAmount.add(loanInstallment.getAmount());
-        }
-        int numberOfInstallmentsPaid = paidLoanInstallments.size();
+        List<LoanInstallment> paidLoanInstallments = updateLoanInstallmentsAsPaid(payableLoanInstallments);
+        SummaryOfPaidLoanInstallments summary = getSummaryOfPaidLoanInstallments(paidLoanInstallments);
         boolean isPaidCompletely = updateLoanAsPaidIfApplicable(loan);
-        customerService.decreaseUsedCreditLimit(customer, totalPaidAmountWithoutInterest);
-        return new PayLoanResponse(numberOfInstallmentsPaid, totalPaidAmount, isPaidCompletely);
-    }
-
-    private boolean updateLoanAsPaidIfApplicable(Loan loan) {
-        if (loanInstallmentRepository.countByLoanIdAndIsPaidFalse(loan.getId()) == 0) {
-            loan.setPaid(true);
-            loanRepository.save(loan);
-            return true;
-        } else {
-            return false;
+        if (summary.numberOfInstallmentsPaid() > 0) {
+            customerService.decreaseUsedCreditLimit(customer, summary.totalPaidAmountWithoutInterest());
         }
+        return new PayLoanResponse(summary.numberOfInstallmentsPaid(), summary.totalPaidAmount(), isPaidCompletely);
     }
 
     private void checkLoanIsNotPaid(Loan loan) {
@@ -249,12 +230,33 @@ public class DefaultLoanService implements LoanService {
         return payableLoanInstallments;
     }
 
-    private List<LoanInstallment> updateLoanInstallmentsAsPaid(List<LoanInstallment> loanInstallments, LocalDate paymentDate) {
+    private List<LoanInstallment> updateLoanInstallmentsAsPaid(List<LoanInstallment> loanInstallments) {
+        LocalDate paymentDate = dateTimeService.getCurrentDateForCurrentBankBranch();
         for (LoanInstallment loanInstallment : loanInstallments) {
             loanInstallment.setPaidAmount(loanInstallment.getAmount());
             loanInstallment.setPaymentDate(paymentDate);
             loanInstallment.setPaid(true);
         }
         return loanInstallmentRepository.saveAll(loanInstallments);
+    }
+
+    private SummaryOfPaidLoanInstallments getSummaryOfPaidLoanInstallments(List<LoanInstallment> paidLoanInstallments) {
+        BigDecimal totalPaidAmountWithoutInterest = BigDecimal.ZERO;
+        BigDecimal totalPaidAmount = BigDecimal.ZERO;
+        for (LoanInstallment loanInstallment : paidLoanInstallments) {
+            totalPaidAmountWithoutInterest = totalPaidAmountWithoutInterest.add(loanInstallment.getAmountWithoutInterest());
+            totalPaidAmount = totalPaidAmount.add(loanInstallment.getAmount());
+        }
+        return new SummaryOfPaidLoanInstallments(totalPaidAmountWithoutInterest, totalPaidAmount, paidLoanInstallments.size());
+    }
+
+    private boolean updateLoanAsPaidIfApplicable(Loan loan) {
+        if (loanInstallmentRepository.countByLoanIdAndIsPaidFalse(loan.getId()) == 0) {
+            loan.setPaid(true);
+            loanRepository.save(loan);
+            return true;
+        } else {
+            return false;
+        }
     }
 }
