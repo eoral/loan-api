@@ -72,7 +72,7 @@ public class DefaultLoanService implements LoanService {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreNullValues();
         Example<Loan> example = Example.of(loanExample, exampleMatcher);
         // It is better to use JPA Metamodel classes when referencing entity attributes.
-        return loanRepository.findAll(example, Sort.by(Sort.Direction.ASC, "createDate"));
+        return loanRepository.findAll(example, Sort.by(Sort.Direction.ASC, "createdDate"));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class DefaultLoanService implements LoanService {
         loan.setLoanAmount(createLoanRequest.amount());
         loan.setNumberOfInstallments(createLoanRequest.numberOfInstallments());
         loan.setInterestRate(createLoanRequest.interestRate());
-        loan.setCreateDate(currentDate);
+        loan.setStartDate(currentDate);
         loan.setIsPaid(false);
         return loanRepository.save(loan);
     }
@@ -142,7 +142,7 @@ public class DefaultLoanService implements LoanService {
             loanInstallment.setLoan(loan);
             loanInstallment.setAmountWithoutInterest(amountWithoutInterest);
             loanInstallment.setAmount(amountWithInterest);
-            loanInstallment.setDueDate(dateTimeService.calculateLoanInstallmentDueDate(loan.getCreateDate(), installmentNo));
+            loanInstallment.setDueDate(dateTimeService.calculateLoanInstallmentDueDate(loan.getStartDate(), installmentNo));
             loanInstallment.setPaid(false);
             loanInstallments.add(loanInstallment);
         }

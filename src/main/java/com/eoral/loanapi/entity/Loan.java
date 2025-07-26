@@ -32,7 +32,7 @@ public class Loan extends BaseEntity {
     private BigDecimal interestRate;
 
     @Column
-    private LocalDate createDate;
+    private LocalDate startDate;
 
     @Column
     private Boolean isPaid;

@@ -29,7 +29,7 @@ public class DefaultEntityDtoConversionService implements EntityDtoConversionSer
                 loan.getLoanAmount(),
                 loan.getNumberOfInstallments(),
                 loan.getInterestRate(),
-                loan.getCreateDate(),
+                loan.getStartDate(),
                 loan.getIsPaid());
     }
 
