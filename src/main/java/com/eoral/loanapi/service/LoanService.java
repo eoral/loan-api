@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface LoanService {
 
-    LoanResponse createLoan(CreateLoanRequest createLoanRequest);
+    LoanResponse createLoan(CreateLoanRequest createLoanRequest, String user);
 
     List<LoanResponse> getLoansOfCustomer(Long customerId, Integer numberOfInstallments, Boolean isPaid);
 

@@ -14,6 +14,8 @@ public interface CustomerService {
 
     Customer checkCustomer(Long customerId);
 
+    void checkCustomerCanBeManagedByUser(Customer customer, String user);
+
     void increaseUsedCreditLimit(Customer customer, BigDecimal amount);
 
     void decreaseUsedCreditLimit(Customer customer, BigDecimal amount);

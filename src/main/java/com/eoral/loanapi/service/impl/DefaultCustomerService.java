@@ -3,10 +3,12 @@ package com.eoral.loanapi.service.impl;
 import com.eoral.loanapi.dto.CustomerResponse;
 import com.eoral.loanapi.entity.Customer;
 import com.eoral.loanapi.exception.BadRequestException;
+import com.eoral.loanapi.exception.ForbiddenException;
 import com.eoral.loanapi.exception.NotFoundException;
 import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.service.CustomerService;
 import com.eoral.loanapi.service.EntityDtoConversionService;
+import com.eoral.loanapi.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -48,6 +50,14 @@ public class DefaultCustomerService implements CustomerService {
         }
         Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
         return optionalCustomer.orElseThrow(() -> new NotFoundException("Customer is not found."));
+    }
+
+    @Override
+    public void checkCustomerCanBeManagedByUser(Customer customer, String user) {
+        boolean canBeManagedByUser = (user.equals(Constants.ADMIN_USER) || user.equals(customer.getCreatedBy()));
+        if (!canBeManagedByUser) {
+            throw new ForbiddenException("Customer cannot be managed by current user.");
+        }
     }
 
     @Override

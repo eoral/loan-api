@@ -77,8 +77,9 @@ public class DefaultLoanService implements LoanService {
 
     @Override
     @Transactional
-    public LoanResponse createLoan(CreateLoanRequest createLoanRequest) {
+    public LoanResponse createLoan(CreateLoanRequest createLoanRequest, String user) {
         Customer customer = customerService.checkCustomer(createLoanRequest.customerId());
+        customerService.checkCustomerCanBeManagedByUser(customer, user);
         BigDecimal availableCreditLimit = customer.getCreditLimit().subtract(customer.getUsedCreditLimit());
         checkAmountForCreateLoan(createLoanRequest.amount(), availableCreditLimit);
         checkNumberOfInstallmentsForCreateLoan(createLoanRequest.numberOfInstallments());

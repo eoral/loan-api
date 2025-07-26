@@ -1,5 +1,6 @@
 package com.eoral.loanapi.config;
 
+import com.eoral.loanapi.util.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -31,13 +32,14 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
+        // Caution! Not recommended on production.
         UserDetails admin = User.withDefaultPasswordEncoder()
-                .username("admin")
+                .username(Constants.ADMIN_USER)
                 .password("1234")
                 .roles("ADMIN", "USER")
                 .build();
         UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user")
+                .username(Constants.NON_ADMIN_USER)
                 .password("5678")
                 .roles("USER")
                 .build();

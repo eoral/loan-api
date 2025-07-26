@@ -4,6 +4,7 @@ import com.eoral.loanapi.dto.*;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -17,8 +18,8 @@ public class LoanController {
     }
 
     @PostMapping("")
-    public LoanResponse createLoan(@RequestBody CreateLoanRequest createLoanRequest) {
-        return loanService.createLoan(createLoanRequest);
+    public LoanResponse createLoan(@RequestBody CreateLoanRequest createLoanRequest, Principal principal) {
+        return loanService.createLoan(createLoanRequest, principal.getName());
     }
 
     @GetMapping("{loanId}/installments")
