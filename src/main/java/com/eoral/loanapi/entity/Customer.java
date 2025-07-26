@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "customer")
-public class Customer {
+public class Customer { // todo: consider using a base entity and timestamps
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_seq_gen")

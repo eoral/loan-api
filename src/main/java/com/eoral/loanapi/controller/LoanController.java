@@ -36,10 +36,7 @@ public class LoanController {
     @GetMapping("test1") // todo: remove
     public LoanResponse test1() {
         // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
-//        if (1 == 1) {
-//            throw new RuntimeException("Hata 2");
-//        }
-        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 48, BigDecimal.valueOf(0.5));
+        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
         return loanService.createLoan(createLoanRequest);
     }
 

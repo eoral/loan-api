@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "loan")
-public class Loan {
+public class Loan { // todo: consider using a base entity and timestamps
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loan_seq_gen")
