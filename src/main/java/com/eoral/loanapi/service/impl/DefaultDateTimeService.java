@@ -19,4 +19,9 @@ public class DefaultDateTimeService implements DateTimeService {
     public LocalDate findMaxDueDateForPayableInstallments(LocalDate currentDate) {
         return currentDate.plusMonths(Constants.EARLY_PAYMENT_MAX_MONTHS).minusDays(1);
     }
+
+    @Override
+    public LocalDate calculateLoanInstallmentDueDate(LocalDate loanDate, int installmentNo) {
+        return loanDate.plusMonths(installmentNo).withDayOfMonth(1);
+    }
 }

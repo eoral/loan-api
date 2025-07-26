@@ -8,4 +8,6 @@ public interface DateTimeService {
 
     LocalDate findMaxDueDateForPayableInstallments(LocalDate currentDate);
 
+    LocalDate calculateLoanInstallmentDueDate(LocalDate loanDate, int installmentNo);
+
 }

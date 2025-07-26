@@ -142,7 +142,7 @@ public class DefaultLoanService implements LoanService {
             loanInstallment.setLoan(loan);
             loanInstallment.setAmountWithoutInterest(amountWithoutInterest);
             loanInstallment.setAmount(amountWithInterest);
-            loanInstallment.setDueDate(calculateLoanInstallmentDueDate(loan.getCreateDate(), installmentNo));
+            loanInstallment.setDueDate(dateTimeService.calculateLoanInstallmentDueDate(loan.getCreateDate(), installmentNo));
             loanInstallment.setPaid(false);
             loanInstallments.add(loanInstallment);
         }
@@ -156,10 +156,6 @@ public class DefaultLoanService implements LoanService {
     private BigDecimal calculateLoanInstallmentAmountWithInterest(BigDecimal loanAmount, int numberOfInstallments, BigDecimal interestRate) {
         BigDecimal loanAmountAfterInterestRateApplied = loanAmount.multiply(BigDecimal.ONE.add(interestRate));
         return loanAmountAfterInterestRateApplied.divide(BigDecimal.valueOf(numberOfInstallments), 2, RoundingMode.CEILING);
-    }
-
-    private LocalDate calculateLoanInstallmentDueDate(LocalDate loanDate, int installmentNo) {
-        return loanDate.plusMonths(installmentNo).withDayOfMonth(1);
     }
 
     @Override
