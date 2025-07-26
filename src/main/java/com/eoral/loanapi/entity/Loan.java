@@ -3,20 +3,15 @@ package com.eoral.loanapi.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "loan")
 @Getter
 @Setter
-public class Loan {
+public class Loan extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loan_seq_gen")
@@ -41,12 +36,4 @@ public class Loan {
 
     @Column
     private Boolean isPaid;
-
-    @Column
-    @CreatedBy
-    private String createdBy;
-
-    @Column
-    @CreatedDate
-    private Instant createdDate;
 }
