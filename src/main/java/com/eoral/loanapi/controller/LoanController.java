@@ -1,6 +1,7 @@
 package com.eoral.loanapi.controller;
 
 import com.eoral.loanapi.dto.*;
+import com.eoral.loanapi.exception.BaseException;
 import com.eoral.loanapi.service.LoanService;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,10 @@ public class LoanController {
     @GetMapping("test1") // todo: remove
     public LoanResponse test1() {
         // Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate
-        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 12, BigDecimal.valueOf(0.5));
+//        if (1 == 1) {
+//            throw new RuntimeException("Hata 2");
+//        }
+        CreateLoanRequest createLoanRequest = new CreateLoanRequest(1L, BigDecimal.valueOf(120000), 48, BigDecimal.valueOf(0.5));
         return loanService.createLoan(createLoanRequest);
     }
 
