@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static com.eoral.loanapi.TestUtils.assertBigDecimalsAreEqual;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -97,7 +98,7 @@ public class DefaultCustomerServiceTest {
         customer.setUsedCreditLimit(BigDecimal.valueOf(50));
         when(customerRepository.save(customer)).thenReturn(customer);
         defaultCustomerService.increaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
-        assertEquals(0, customer.getUsedCreditLimit().compareTo(BigDecimal.valueOf(70)));
+        assertBigDecimalsAreEqual(BigDecimal.valueOf(70), customer.getUsedCreditLimit());
     }
 
     @Test
@@ -115,7 +116,7 @@ public class DefaultCustomerServiceTest {
         customer.setUsedCreditLimit(BigDecimal.valueOf(50));
         when(customerRepository.save(customer)).thenReturn(customer);
         defaultCustomerService.decreaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
-        assertEquals(0, customer.getUsedCreditLimit().compareTo(BigDecimal.valueOf(30)));
+        assertBigDecimalsAreEqual(BigDecimal.valueOf(30), customer.getUsedCreditLimit());
     }
 
     @Test
