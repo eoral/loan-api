@@ -8,7 +8,7 @@ import com.eoral.loanapi.exception.NotFoundException;
 import com.eoral.loanapi.repository.CustomerRepository;
 import com.eoral.loanapi.service.CustomerService;
 import com.eoral.loanapi.service.EntityDtoConversionService;
-import com.eoral.loanapi.util.Constants;
+import com.eoral.loanapi.service.SecurityContextService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,12 +20,15 @@ import java.util.stream.Collectors;
 public class DefaultCustomerService implements CustomerService {
 
     private final EntityDtoConversionService entityDtoConversionService;
+    private final SecurityContextService securityContextService;
     private final CustomerRepository customerRepository;
 
     public DefaultCustomerService(
             EntityDtoConversionService entityDtoConversionService,
+            SecurityContextService securityContextService,
             CustomerRepository customerRepository) {
         this.entityDtoConversionService = entityDtoConversionService;
+        this.securityContextService = securityContextService;
         this.customerRepository = customerRepository;
     }
 
@@ -53,8 +56,9 @@ public class DefaultCustomerService implements CustomerService {
     }
 
     @Override
-    public void checkCustomerCanBeManagedByUser(Customer customer, String user) {
-        boolean canBeManagedByUser = (user.equals(Constants.ADMIN_USER) || user.equals(customer.getCreatedBy()));
+    public void checkCustomerCanBeManagedByCurrentUser(Customer customer) {
+        boolean canBeManagedByUser = (securityContextService.currentUserHasAdminRole()
+                || securityContextService.getCurrentUsername().equals(customer.getCreatedBy()));
         if (!canBeManagedByUser) {
             throw new ForbiddenException("Customer cannot be managed by current user.");
         }

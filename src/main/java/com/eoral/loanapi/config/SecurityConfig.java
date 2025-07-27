@@ -34,14 +34,14 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         // Caution! Not recommended on production.
         UserDetails admin = User.withDefaultPasswordEncoder()
-                .username(Constants.ADMIN_USER)
+                .username("admin")
                 .password("1234")
-                .roles("ADMIN", "USER")
+                .roles(Constants.ADMIN_ROLE)
                 .build();
         UserDetails user = User.withDefaultPasswordEncoder()
-                .username(Constants.NON_ADMIN_USER)
+                .username("user")
                 .password("5678")
-                .roles("USER")
+                .roles(Constants.USER_ROLE)
                 .build();
         return new InMemoryUserDetailsManager(admin, user);
     }

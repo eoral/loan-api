@@ -16,7 +16,7 @@ public class Constants {
 
     public static final int EARLY_PAYMENT_MAX_MONTHS = 3;
 
-    public static final String ADMIN_USER = "admin";
-    public static final String NON_ADMIN_USER = "user";
+    public static final String ADMIN_ROLE = "ADMIN";
+    public static final String USER_ROLE = "USER";
 
 }
