@@ -51,7 +51,8 @@ public class DefaultLoanService implements LoanService {
 
     @Override
     public List<LoanResponse> getLoansOfCustomer(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
-        customerService.checkCustomer(customerId);
+        Customer customer = customerService.checkCustomer(customerId);
+        customerService.checkCustomerCanBeManagedByCurrentUser(customer);
         List<Loan> loans = getLoans(customerId, numberOfInstallments, isPaid);
         return loans.stream()
                 .map(e -> entityDtoConversionService.convertToLoanResponse(e))
