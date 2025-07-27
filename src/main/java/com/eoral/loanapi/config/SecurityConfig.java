@@ -32,15 +32,12 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Caution! Not recommended on production.
-        UserDetails admin = User.withDefaultPasswordEncoder()
-                .username("admin")
-                .password("1234")
+        UserDetails admin = User.withUsername("admin")
+                .password("{bcrypt}$2a$10$XbF4dX4bVvndDJf92fYu5O8psY91WRRjpMdwzQk1V0IA.uPws2H3.")
                 .roles(Constants.ADMIN_ROLE)
                 .build();
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user")
-                .password("5678")
+        UserDetails user = User.withUsername("user")
+                .password("{bcrypt}$2a$10$BHuAUNk2VhkijoPY2MBnTOoD91lHdxY7S/1DufYucxg3HpZqa99AW")
                 .roles(Constants.USER_ROLE)
                 .build();
         return new InMemoryUserDetailsManager(admin, user);
