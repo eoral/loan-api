@@ -17,7 +17,15 @@
 - Check if the app works: `curl http://localhost:8080/customers -u admin:1234`
 - Expected output: 
 ```
-[{"id":1,"name":"Eray","surname":"Oral","creditLimit":1000000.00,"usedCreditLimit":0.00}]
+[
+	{
+		"id": 1,
+		"name": "Eray",
+		"surname": "Oral",
+		"creditLimit": 1000000.0,
+		"usedCreditLimit": 0.0
+	}
+]
 ```
 
 # Endpoint: Create Loan
