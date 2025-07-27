@@ -8,11 +8,7 @@ import com.eoral.loanapi.exception.BadRequestException;
 import com.eoral.loanapi.exception.NotFoundException;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.repository.LoanRepository;
-import com.eoral.loanapi.service.CustomerService;
-import com.eoral.loanapi.service.DateTimeService;
-import com.eoral.loanapi.service.EntityDtoConversionService;
-import com.eoral.loanapi.service.LoanService;
-import com.eoral.loanapi.util.Constants;
+import com.eoral.loanapi.service.*;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
@@ -31,6 +27,7 @@ import java.util.stream.Collectors;
 public class DefaultLoanService implements LoanService {
 
     private final CustomerService customerService;
+    private final ValidationService validationService;
     private final DateTimeService dateTimeService;
     private final EntityDtoConversionService entityDtoConversionService;
     private final LoanRepository loanRepository;
@@ -38,11 +35,13 @@ public class DefaultLoanService implements LoanService {
 
     public DefaultLoanService(
             CustomerService customerService,
+            ValidationService validationService,
             DateTimeService dateTimeService,
             EntityDtoConversionService entityDtoConversionService,
             LoanRepository loanRepository,
             LoanInstallmentRepository loanInstallmentRepository) {
         this.customerService = customerService;
+        this.validationService = validationService;
         this.dateTimeService = dateTimeService;
         this.entityDtoConversionService = entityDtoConversionService;
         this.loanRepository = loanRepository;
@@ -82,43 +81,13 @@ public class DefaultLoanService implements LoanService {
         Customer customer = customerService.checkCustomer(createLoanRequest.customerId());
         customerService.checkCustomerCanBeManagedByCurrentUser(customer);
         BigDecimal availableCreditLimit = customer.getCreditLimit().subtract(customer.getUsedCreditLimit());
-        checkAmountForCreateLoan(createLoanRequest.amount(), availableCreditLimit);
-        checkNumberOfInstallmentsForCreateLoan(createLoanRequest.numberOfInstallments());
-        checkInterestRateForCreateLoan(createLoanRequest.interestRate());
+        validationService.checkAmountForCreateLoan(createLoanRequest.amount(), availableCreditLimit);
+        validationService.checkNumberOfInstallmentsForCreateLoan(createLoanRequest.numberOfInstallments());
+        validationService.checkInterestRateForCreateLoan(createLoanRequest.interestRate());
         Loan loan = createLoan(customer, createLoanRequest);
         createLoanInstallments(loan, createLoanRequest);
         customerService.increaseUsedCreditLimit(customer, createLoanRequest.amount());
         return entityDtoConversionService.convertToLoanResponse(loan);
-    }
-
-    private void checkAmountForCreateLoan(BigDecimal amount, BigDecimal availableCreditLimit) {
-        if (amount == null) {
-            throw new BadRequestException("Amount is not specified.");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Amount should be greater than 0.");
-        }
-        if (amount.compareTo(availableCreditLimit) > 0) {
-            throw new BadRequestException("Amount exceeds available credit limit.");
-        }
-    }
-
-    private void checkNumberOfInstallmentsForCreateLoan(Integer numberOfInstallments) {
-        if (numberOfInstallments == null) {
-            throw new BadRequestException("Number of installments is not specified.");
-        }
-        if (!Constants.ALLOWED_NUMBER_OF_INSTALLMENTS.contains(numberOfInstallments)) {
-            throw new BadRequestException("Number of installments should be one of " + Constants.ALLOWED_NUMBER_OF_INSTALLMENTS_STR);
-        }
-    }
-
-    private void checkInterestRateForCreateLoan(BigDecimal interestRate) {
-        if (interestRate == null) {
-            throw new BadRequestException("Interest rate is not specified.");
-        }
-        if (interestRate.compareTo(Constants.MIN_INTEREST_RATE) < 0 || interestRate.compareTo(Constants.MAX_INTEREST_RATE) > 0) {
-            throw new BadRequestException("Interest rate should be between " + Constants.INTEREST_RATE_RANGE_STR);
-        }
     }
 
     private Loan createLoan(Customer customer, CreateLoanRequest createLoanRequest) {
