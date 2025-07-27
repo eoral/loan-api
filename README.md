@@ -31,6 +31,21 @@
 	"interestRate": 0.5
 }
 ```
+- Sample response body:
+```
+{
+	"id": 1,
+	"loanAmount": 120000,
+	"numberOfInstallments": 12,
+	"interestRate": 0.5,
+	"startDate": "2025-07-27",
+	"isPaid": false
+}
+```
+- Sample curl command:
+```
+curl -v -X POST http://localhost:8080/loans -H "Content-Type: application/json" -d "{\"customerId\":1,\"amount\":120000,\"numberOfInstallments\":12,\"interestRate\":0.5}" -u admin:1234
+```
 
 # Endpoint: List Loans For A Given Customer
 - Make a GET request to `/loans`
