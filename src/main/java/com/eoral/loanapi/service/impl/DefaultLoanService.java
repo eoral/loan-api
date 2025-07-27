@@ -162,7 +162,8 @@ public class DefaultLoanService implements LoanService {
 
     @Override
     public List<LoanInstallmentResponse> getInstallmentsOfLoan(Long loanId) {
-        checkLoan(loanId);
+        Loan loan = checkLoan(loanId);
+        customerService.checkCustomerCanBeManagedByCurrentUser(loan.getCustomer());
         return loanInstallmentRepository.findByLoanIdOrderByDueDate(loanId).stream()
                 .map(e -> entityDtoConversionService.convertToLoanInstallmentResponse(e))
                 .collect(Collectors.toList());
