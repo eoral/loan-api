@@ -8,7 +8,7 @@
   - Username: user, password: 5678, role: USER
 - Windows Command Prompt is being used in following examples.
 
-# Start the app
+# How to build and run the app
 - `git clone https://github.com/eoral/loan-api.git`
 - `cd loan-api`
 - Set Java 17 to JAVA_HOME environment variable temporarily in current console session.
