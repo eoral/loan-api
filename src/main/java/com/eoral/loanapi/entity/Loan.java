@@ -31,6 +31,10 @@ public class Loan extends BaseEntity {
     @Column
     private BigDecimal interestRate;
 
+    /**
+     * This field corresponds to createDate field that was mentioned in the document.
+     * I changed its name because I have an audit field named createdDate in BaseEntity.
+     */
     @Column
     private LocalDate startDate;
 
