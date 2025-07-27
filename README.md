@@ -30,6 +30,7 @@
 
 # Endpoint: Create Loan
 - Make a POST request to `/loans`
+- Users with ADMIN role can operate on all customers. Other users can operate on customers that were created by them.
 - Sample request body:
 ```
 {
@@ -57,6 +58,7 @@ curl -v -X POST http://localhost:8080/loans -H "Content-Type: application/json" 
 
 # Endpoint: List Loans For A Given Customer
 - Make a GET request to `/loans`
+- Users with ADMIN role can operate on all customers. Other users can operate on customers that were created by them.
 - Request params:
   - customerId: long, required
   - numberOfInstallments: integer, optional
@@ -81,6 +83,7 @@ curl -v http://localhost:8080/loans?customerId=1 -u admin:1234
 
 # Endpoint: List Installments For A Given Loan
 - Make a GET request to `/loans/{loanId}/installments`
+- Users with ADMIN role can operate on all customers. Other users can operate on customers that were created by them.
 - Sample response body:
 ```
 [
@@ -120,6 +123,7 @@ curl -v http://localhost:8080/loans/1/installments -u admin:1234
 
 # Endpoint: Pay Loan
 - Make a POST request to `/loans/{loanId}/payment`
+- Users with ADMIN role can operate on all customers. Other users can operate on customers that were created by them.
 - Sample request body:
 ```
 {
