@@ -13,11 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DefaultCustomerServiceTest {
@@ -88,5 +89,41 @@ public class DefaultCustomerServiceTest {
         RuntimeException exception = assertThrows(ForbiddenException.class,
                 () -> defaultCustomerService.checkCustomerCanBeManagedByCurrentUser(customer));
         assertEquals("Customer cannot be managed by current user.", exception.getMessage());
+    }
+
+    @Test
+    public void increaseUsedCreditLimitShouldIncreaseUsedCreditLimit() {
+        Customer customer = new Customer();
+        customer.setUsedCreditLimit(BigDecimal.valueOf(50));
+        when(customerRepository.save(customer)).thenReturn(customer);
+        defaultCustomerService.increaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
+        assertEquals(0, customer.getUsedCreditLimit().compareTo(BigDecimal.valueOf(70)));
+    }
+
+    @Test
+    public void increaseUsedCreditLimitShouldCallRepositorySave() {
+        Customer customer = new Customer();
+        customer.setUsedCreditLimit(BigDecimal.valueOf(50));
+        when(customerRepository.save(customer)).thenReturn(customer);
+        defaultCustomerService.increaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
+        verify(customerRepository, times(1)).save(any(Customer.class));
+    }
+
+    @Test
+    public void decreaseUsedCreditLimitShouldDecreaseUsedCreditLimit() {
+        Customer customer = new Customer();
+        customer.setUsedCreditLimit(BigDecimal.valueOf(50));
+        when(customerRepository.save(customer)).thenReturn(customer);
+        defaultCustomerService.decreaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
+        assertEquals(0, customer.getUsedCreditLimit().compareTo(BigDecimal.valueOf(30)));
+    }
+
+    @Test
+    public void decreaseUsedCreditLimitShouldCallRepositorySave() {
+        Customer customer = new Customer();
+        customer.setUsedCreditLimit(BigDecimal.valueOf(50));
+        when(customerRepository.save(customer)).thenReturn(customer);
+        defaultCustomerService.decreaseUsedCreditLimit(customer, BigDecimal.valueOf(20));
+        verify(customerRepository, times(1)).save(any(Customer.class));
     }
 }
