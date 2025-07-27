@@ -2,22 +2,20 @@ package com.eoral.loanapi.service.impl;
 
 import com.eoral.loanapi.dto.CreateLoanRequest;
 import com.eoral.loanapi.entity.Customer;
-import com.eoral.loanapi.exception.BadRequestException;
 import com.eoral.loanapi.repository.LoanInstallmentRepository;
 import com.eoral.loanapi.repository.LoanRepository;
 import com.eoral.loanapi.service.CustomerService;
-import com.eoral.loanapi.service.DateTimeService;
-import com.eoral.loanapi.service.EntityDtoConversionService;
+import com.eoral.loanapi.service.ValidationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -27,9 +25,11 @@ public class DefaultLoanServiceTest {
     @Mock
     private CustomerService customerService;
     @Mock
-    private DateTimeService dateTimeService;
-    @Mock
-    private EntityDtoConversionService entityDtoConversionService;
+    private ValidationService validationService;
+    @Spy
+    private DefaultDateTimeService dateTimeService; // Use actual implementation instead of a mock
+    @Spy
+    private DefaultEntityDtoConversionService entityDtoConversionService; // Use actual implementation instead of a mock
     @Mock
     private LoanRepository loanRepository;
     @Mock
@@ -40,6 +40,9 @@ public class DefaultLoanServiceTest {
     private static final Long DEFAULT_CUSTOMER_ID = 1L;
     private static final BigDecimal DEFAULT_CREDIT_LIMIT = BigDecimal.valueOf(100000);
     private static final BigDecimal DEFAULT_USED_CREDIT_LIMIT = BigDecimal.ZERO;
+    private static final BigDecimal DEFAULT_AMOUNT_FOR_CREATE_LOAN = BigDecimal.valueOf(50000);
+    private static final Integer DEFAULT_NUMBER_OF_INSTALLMENTS_FOR_CREATE_LOAN = 6;
+    private static final BigDecimal DEFAULT_INTEREST_RATE_FOR_CREATE_LOAN = new BigDecimal("0.5");
 
     private static Customer newCustomer() {
         Customer customer = new Customer();
@@ -49,40 +52,27 @@ public class DefaultLoanServiceTest {
         return customer;
     }
 
-    private static CreateLoanRequest newCreateLoanRequest(
-            Long customerId, BigDecimal amount, Integer numberOfInstallments, BigDecimal interestRate) {
-        return new CreateLoanRequest(customerId, amount, numberOfInstallments, interestRate);
+    private static CreateLoanRequest newCreateLoanRequest() {
+        return new CreateLoanRequest(
+                DEFAULT_CUSTOMER_ID,
+                DEFAULT_AMOUNT_FOR_CREATE_LOAN,
+                DEFAULT_NUMBER_OF_INSTALLMENTS_FOR_CREATE_LOAN,
+                DEFAULT_INTEREST_RATE_FOR_CREATE_LOAN);
     }
 
-    private void createLoanShouldThrowExceptionWhenAmountIsInvalid(BigDecimal amount, String expectedErrorMessage) {
+    @Test
+    public void createLoanShouldSucceed() {
         Customer customer = newCustomer();
-        CreateLoanRequest createLoanRequest = newCreateLoanRequest(customer.getId(), amount, 6, new BigDecimal("0.5"));
-        when(customerService.checkCustomer(customer.getId())).thenReturn(customer);
+        BigDecimal availableCreditLimit = customer.getCreditLimit().subtract(customer.getUsedCreditLimit());
+        CreateLoanRequest createLoanRequest = newCreateLoanRequest();
+        when(customerService.checkCustomer(createLoanRequest.customerId())).thenReturn(customer);
         doNothing().when(customerService).checkCustomerCanBeManagedByCurrentUser(customer);
-        RuntimeException exception = assertThrows(BadRequestException.class,
-                () -> defaultLoanService.createLoan(createLoanRequest));
-        assertEquals(expectedErrorMessage, exception.getMessage());
-    }
-
-    @Test
-    public void createLoanShouldThrowExceptionWhenAmountIsNull() {
-        createLoanShouldThrowExceptionWhenAmountIsInvalid(null, "Amount is not specified.");
-    }
-
-    @Test
-    public void createLoanShouldThrowExceptionWhenAmountIsLessThanZero() {
-        createLoanShouldThrowExceptionWhenAmountIsInvalid(BigDecimal.valueOf(-1), "Amount should be greater than 0.");
-    }
-
-    @Test
-    public void createLoanShouldThrowExceptionWhenAmountIsZero() {
-        createLoanShouldThrowExceptionWhenAmountIsInvalid(BigDecimal.ZERO, "Amount should be greater than 0.");
-    }
-
-    @Test
-    public void createLoanShouldThrowExceptionWhenAmountIsGreaterThanAvailableCreditLimit() {
-        BigDecimal availableCreditLimit = DEFAULT_CREDIT_LIMIT.subtract(DEFAULT_USED_CREDIT_LIMIT);
-        BigDecimal amountThanExceedsAvailableCreditLimit = availableCreditLimit.add(BigDecimal.ONE);
-        createLoanShouldThrowExceptionWhenAmountIsInvalid(amountThanExceedsAvailableCreditLimit, "Amount exceeds available credit limit.");
+        doNothing().when(validationService).checkAmountForCreateLoan(createLoanRequest.amount(), availableCreditLimit);
+        doNothing().when(validationService).checkNumberOfInstallmentsForCreateLoan(createLoanRequest.numberOfInstallments());
+        doNothing().when(validationService).checkInterestRateForCreateLoan(createLoanRequest.interestRate());
+        when(loanRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        when(loanInstallmentRepository.saveAll(any())).thenAnswer(i -> i.getArguments()[0]);
+        doNothing().when(customerService).increaseUsedCreditLimit(any(), any());
+        defaultLoanService.createLoan(createLoanRequest);
     }
 }
