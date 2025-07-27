@@ -1,8 +1,11 @@
 # Intro
 - This is a simple Spring Boot web app to demonstrate Loan API case study.
 - All endpoints except H2 console and Swagger ui are protected with HTTP basic authentication.
-- H2 console: `http://localhost:8080/h2-console`
-- Swagger ui: `http://localhost:8080/swagger-ui/index.html`
+- H2 console: 
+  - URL: `http://localhost:8080/h2-console`
+  - Password: 123456
+- Swagger ui: 
+  - URL: `http://localhost:8080/swagger-ui/index.html`
 - There are 2 users:
   - Username: admin, password: 1234, role: ADMIN
   - Username: user, password: 5678, role: USER
