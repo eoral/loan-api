@@ -16,6 +16,14 @@ public class LoanController {
         this.loanService = loanService;
     }
 
+    @GetMapping("")
+    public List<LoanResponse> getLoansOfCustomer(
+            @RequestParam Long customerId,
+            @RequestParam(required = false) Integer numberOfInstallments,
+            @RequestParam(required = false) Boolean isPaid) {
+        return loanService.getLoansOfCustomer(customerId, numberOfInstallments, isPaid);
+    }
+
     @PostMapping("")
     public LoanResponse createLoan(@RequestBody CreateLoanRequest createLoanRequest) {
         return loanService.createLoan(createLoanRequest);
