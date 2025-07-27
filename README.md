@@ -1,1 +1,52 @@
-# loan-api
+# Intro
+- This is a simple Spring Boot app to demonstrate Loan API.
+- All endpoints except **h2-console** are protected with HTTP basic authentication.
+- There are 2 users:
+  - Username: admin, password: 1234, role: ADMIN
+  - Username: user, password: 5678, role: USER
+- Windows Command Prompt is being used in following examples.
+
+# Start the app
+- `git clone https://github.com/eoral/loan-api.git`
+- `cd loan-api`
+- Set Java 17 to JAVA_HOME environment variable temporarily in current console session.
+    - Example (Windows): `set JAVA_HOME=C:\Program Files\Java\jdk-17`
+    - Example (Unix): `export JAVA_HOME=/usr/lib/jvm/java-17`
+- `mvnw.cmd clean install`
+- `mvnw.cmd spring-boot:run`
+- Check if the app works: `curl http://localhost:8080/customers -u admin:1234`
+- Expected output: 
+```
+[{"id":1,"name":"Eray","surname":"Oral","creditLimit":1000000.00,"usedCreditLimit":0.00}]
+```
+
+# Endpoint: Create Loan
+- Make a POST request to `/loans`
+- Sample request body:
+```
+{
+	"customerId": 1,
+	"amount": 120000,
+	"numberOfInstallments": 12,
+	"interestRate": 0.5
+}
+```
+
+# Endpoint: List Loans For A Given Customer
+- Make a GET request to `/loans`
+- Request params:
+  - customerId: long, required
+  - numberOfInstallments: integer, optional
+  - isPaid: boolean, optional
+
+# Endpoint: List Installments For A Given Loan
+- Make a GET request to `/loans/{loanId}/installments`
+
+# Endpoint: Pay Loan
+- Make a POST request to `/loans/{loanId}/payment`
+- Sample request body:
+```
+{
+	"amount": 180000
+}
+```
