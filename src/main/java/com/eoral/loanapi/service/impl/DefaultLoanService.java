@@ -181,6 +181,7 @@ public class DefaultLoanService implements LoanService {
     @Transactional
     public PayLoanResponse payLoan(Long loanId, PayLoanRequest payLoanRequest) {
         Loan loan = checkLoan(loanId);
+        customerService.checkCustomerCanBeManagedByCurrentUser(loan.getCustomer());
         checkLoanIsNotPaid(loan);
         checkAmountForPayLoan(payLoanRequest.amount());
         List<LoanInstallment> payableLoanInstallments = findPayableLoanInstallments(loanId, payLoanRequest.amount());
