@@ -61,15 +61,80 @@ curl -v -X POST http://localhost:8080/loans -H "Content-Type: application/json" 
   - customerId: long, required
   - numberOfInstallments: integer, optional
   - isPaid: boolean, optional
+- Sample response body:
+```
+[
+	{
+		"id": 1,
+		"loanAmount": 120000.0,
+		"numberOfInstallments": 12,
+		"interestRate": 0.5,
+		"startDate": "2025-07-27",
+		"isPaid": false
+	}
+]
+```
+- Sample curl command:
+```
+curl -v http://localhost:8080/loans?customerId=1 -u admin:1234
+```
 
 # Endpoint: List Installments For A Given Loan
 - Make a GET request to `/loans/{loanId}/installments`
+- Sample response body:
+```
+[
+	{
+		"id": 1,
+		"amountWithoutInterest": 10000.0,
+		"amount": 15000.0,
+		"paidAmount": null,
+		"dueDate": "2025-08-01",
+		"paymentDate": null,
+		"isPaid": false
+	},
+	{
+		"id": 2,
+		"amountWithoutInterest": 10000.0,
+		"amount": 15000.0,
+		"paidAmount": null,
+		"dueDate": "2025-09-01",
+		"paymentDate": null,
+		"isPaid": false
+	},
+	{
+		"id": 3,
+		"amountWithoutInterest": 10000.0,
+		"amount": 15000.0,
+		"paidAmount": null,
+		"dueDate": "2025-10-01",
+		"paymentDate": null,
+		"isPaid": false
+	}
+]
+```
+- Sample curl command:
+```
+curl -v http://localhost:8080/loans/1/installments -u admin:1234
+```
 
 # Endpoint: Pay Loan
 - Make a POST request to `/loans/{loanId}/payment`
 - Sample request body:
 ```
 {
-	"amount": 180000
+	"amount": 80000
 }
+```
+- Sample response body:
+```
+{
+	"numberOfInstallmentsPaid": 3,
+	"totalAmountSpent": 45000.0,
+	"isPaidCompletely": false
+}
+```
+- Sample curl command:
+```
+curl -v -X POST http://localhost:8080/loans/1/payment -H "Content-Type: application/json" -d "{\"amount\":80000}" -u admin:1234
 ```
