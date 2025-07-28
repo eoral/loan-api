@@ -29,6 +29,13 @@
 		"surname": "Oral",
 		"creditLimit": 1000000.0,
 		"usedCreditLimit": 0.0
+	},
+	{
+		"id": 2,
+		"name": "Arzu",
+		"surname": "Dogan",
+		"creditLimit": 1000000.0,
+		"usedCreditLimit": 0.0
 	}
 ]
 ```
