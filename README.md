@@ -1,5 +1,6 @@
 # Intro
 - This is a simple Spring Boot web app to demonstrate Loan API case study.
+- Bonus-1 implemented. Bonus-2 not implemented.
 - All endpoints except H2 console and Swagger ui are protected with HTTP basic authentication.
 - H2 console: 
   - URL: `http://localhost:8080/h2-console`
