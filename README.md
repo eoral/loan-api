@@ -19,7 +19,7 @@
     - Example (Unix): `export JAVA_HOME=/usr/lib/jvm/java-17`
 - `mvnw.cmd clean install`
 - `mvnw.cmd spring-boot:run`
-- Check if the app works: `curl http://localhost:8080/customers -u admin:1234`
+- Check if the app works: `curl "http://localhost:8080/customers" -u admin:1234`
 - Expected output: 
 ```
 [
@@ -58,7 +58,7 @@
 ```
 - Sample curl command:
 ```
-curl -v -X POST http://localhost:8080/loans -H "Content-Type: application/json" -d "{\"customerId\":1,\"amount\":120000,\"numberOfInstallments\":12,\"interestRate\":0.5}" -u admin:1234
+curl -v -X POST "http://localhost:8080/loans" -H "Content-Type: application/json" -d "{\"customerId\":1,\"amount\":120000,\"numberOfInstallments\":12,\"interestRate\":0.5}" -u admin:1234
 ```
 
 # Endpoint: List Loans For A Given Customer
@@ -81,9 +81,11 @@ curl -v -X POST http://localhost:8080/loans -H "Content-Type: application/json" 
 	}
 ]
 ```
-- Sample curl command:
+- Sample curl commands:
 ```
-curl -v http://localhost:8080/loans?customerId=1 -u admin:1234
+curl -v "http://localhost:8080/loans?customerId=1" -u admin:1234
+curl -v "http://localhost:8080/loans?customerId=1&numberOfInstallments=12" -u admin:1234
+curl -v "http://localhost:8080/loans?customerId=1&numberOfInstallments=12&isPaid=false" -u admin:1234
 ```
 
 # Endpoint: List Installments For A Given Loan
@@ -123,7 +125,7 @@ curl -v http://localhost:8080/loans?customerId=1 -u admin:1234
 ```
 - Sample curl command:
 ```
-curl -v http://localhost:8080/loans/1/installments -u admin:1234
+curl -v "http://localhost:8080/loans/1/installments" -u admin:1234
 ```
 
 # Endpoint: Pay Loan
@@ -145,5 +147,5 @@ curl -v http://localhost:8080/loans/1/installments -u admin:1234
 ```
 - Sample curl command:
 ```
-curl -v -X POST http://localhost:8080/loans/1/payment -H "Content-Type: application/json" -d "{\"amount\":80000}" -u admin:1234
+curl -v -X POST "http://localhost:8080/loans/1/payment" -H "Content-Type: application/json" -d "{\"amount\":80000}" -u admin:1234
 ```
