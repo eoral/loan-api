@@ -34,8 +34,15 @@ public class DefaultCustomerService implements CustomerService {
 
     @Override
     public List<CustomerResponse> getAllCustomers() {
-        // I am returning all records for simplicity. Normally, we should do paging.
-        return customerRepository.findAll().stream()
+        List<Customer> customers;
+        if (securityContextService.currentUserHasAdminRole()) {
+            // I am returning all records for simplicity. Normally, we should do paging.
+            customers = customerRepository.findAll();
+        } else {
+            // I am returning all records for simplicity. Normally, we should do paging.
+            customers = customerRepository.findAllByCreatedBy(securityContextService.getCurrentUsername());
+        }
+        return customers.stream()
                 .map(e -> entityDtoConversionService.convertToCustomerResponse(e))
                 .collect(Collectors.toList());
     }
@@ -43,6 +50,7 @@ public class DefaultCustomerService implements CustomerService {
     @Override
     public CustomerResponse getCustomer(Long customerId) {
         Customer customer = checkCustomer(customerId);
+        checkCustomerCanBeManagedByCurrentUser(customer);
         return entityDtoConversionService.convertToCustomerResponse(customer);
     }
 
