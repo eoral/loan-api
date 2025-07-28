@@ -85,6 +85,7 @@ curl -v -X POST "http://localhost:8080/loans" -H "Content-Type: application/json
 ```
 curl -v "http://localhost:8080/loans?customerId=1" -u admin:1234
 curl -v "http://localhost:8080/loans?customerId=1&numberOfInstallments=12" -u admin:1234
+curl -v "http://localhost:8080/loans?customerId=1&isPaid=false" -u admin:1234
 curl -v "http://localhost:8080/loans?customerId=1&numberOfInstallments=12&isPaid=false" -u admin:1234
 ```
 
