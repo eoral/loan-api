@@ -40,6 +40,30 @@
 ]
 ```
 
+# HTTP status codes that are returned on failure
+- 400 Bad Request is returned for invalid input.
+- Sample response body:
+```
+{ "message": "Amount exceeds available credit limit." }
+```
+- 403 Forbidden is returned when a user does not have ADMIN role and tries to operate on customers created by other users.
+- Sample response body:
+```
+{ "message": "Customer cannot be managed by current user." }
+```
+- 404 Not Found is returned for missing entities.
+- Sample response body:
+```
+{ "message": "Customer is not found." }
+```
+- 500 Internal Server Error is returned when an unexpected error occurs. Details are not exposed to the client for security reasons. Error message contains a UUID. When this UUID is searched in application logs, details can be seen by a developer.
+- Sample response body:
+```
+{ "message": "Unknown error 27aafec6-4ab5-4196-8e7d-39dbbd8e0828" }
+```
+- Sample application log:
+![Sample application log for HTTP 500](./sample-app-log-for-http-500.png)
+
 # Endpoint: Create Loan
 - Make a POST request to `/loans`
 - Users with ADMIN role can operate on all customers. Other users can operate on customers that were created by them.
